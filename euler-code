@@ -1,0 +1,99 @@
+import sys
+import math
+import pygame
+from pygame.locals import *
+
+pygame.init()
+
+
+fps = 100
+fpsClock = pygame.time.Clock()
+
+width, height = 1000, 400
+screen = pygame.display.set_mode((width, height))
+
+acceleration = -9.81
+
+class Ut():
+  
+  @staticmethod
+  def tr(t):
+    return (t[0],height-t[1])
+    
+
+
+class Projectile():
+  def __init__(self):
+    self.start()
+
+  def start(self):
+    self.tt=0.0
+    self.balldist = 0.0
+    self.ballheight = 0.0
+    self.speed = 100.0
+    self.angle = 45.0
+    self.vertvel = self.speed * math.sin(math.radians(self.angle))
+    self.horvel = self.speed * math.cos(math.radians(self.angle))
+    self.ball_path = []
+    self.ball_path.append( Ut.tr((self.balldist,self.ballheight)) )
+    self.hm = False
+    self.dm = False
+    self.tm = False
+  
+ 
+  def printstats(self):
+    print( "Time in sec",self.tt/fps)
+    print ("Ball distance", self.balldist )
+    print ("Ball ballheight", self.ballheight )
+    print ("Ball vertvel", self.vertvel )
+    print ("Ball horvel", self.horvel )
+    
+
+  def draw(self):
+    
+    #pygame.draw.line(screen,(255,255,255), Ut.tr((0,0)),Ut.tr((640,0)))
+    #pygame.draw.line(screen,(255,255,255),Ut.tr((0,0)),Ut.tr((0,480)))
+
+    pygame.draw.circle(screen, (255,0,0), Ut.tr((self.balldist,self.ballheight)), 5)
+    if len(self.ball_path) > 2: 
+      pygame.draw.aalines(screen, (255,255,0), False,self.ball_path,True)
+    
+
+  def animate(self):
+    self.tt += 1
+    self.vertvel += acceleration/fps        
+    self.balldist += self.horvel/fps
+    self.ballheight += self.vertvel/fps
+    self.ball_path.append( Ut.tr((self.balldist,self.ballheight)) )
+
+TT = True
+ball = Projectile()
+# Game loop.
+while True:
+    screen.fill((0, 0, 0))
+    
+    if(ball.ballheight <= 0) and TT and ball.tt > 2:
+      print(ball.vertvel)
+      print(ball.balldist)
+      print(ball.ballheight)
+      TT = False 
+    
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+          if event.key == K_r:
+            print(ball.vertvel)
+            print(ball.balldist)        
+            ball.start()
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+
+    # Update.
+    ball.animate()
+    ball.draw()
+    pygame.transform.flip(screen,False,False)
+
+    # Draw.
+
+    pygame.display.flip()
+    fpsClock.tick(fps)
